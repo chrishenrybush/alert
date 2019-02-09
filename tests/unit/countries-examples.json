@@ -1,0 +1,50 @@
+[
+  {
+    "term_id": 164,
+    "name": "Asia",
+    "slug": "asia",
+    "term_group": 0,
+    "term_taxonomy_id": 164,
+    "taxonomy": "location",
+    "description": "",
+    "parent": 0,
+    "count": 326,
+    "filter": "raw"
+  },
+  {
+    "term_id": 165,
+    "name": "China",
+    "slug": "china",
+    "term_group": 0,
+    "term_taxonomy_id": 165,
+    "taxonomy": "location",
+    "description": "",
+    "parent": 164,
+    "count": 144,
+    "filter": "raw"
+  },
+  {
+    "term_id": 168,
+    "name": "Japan",
+    "slug": "japan",
+    "term_group": 0,
+    "term_taxonomy_id": 168,
+    "taxonomy": "location",
+    "description": "",
+    "parent": 164,
+    "count": 79,
+    "filter": "raw"
+  },
+  {
+    "term_id": 194,
+    "name": "Saudi Arabia",
+    "slug": "saudi-arabia",
+    "term_group": 0,
+    "term_taxonomy_id": 194,
+    "taxonomy": "location",
+    "description": "",
+    "parent": 164,
+    "count": 9,
+    "filter": "raw"
+  }
+]
