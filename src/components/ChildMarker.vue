@@ -19,7 +19,7 @@ export default {
     storeId: function(val) {
       if (val === this.position.storeId) {
         this.infowindow.open(this.map, this.marker);
-        this.marker.setAnimation(this.google.maps.Animation.BOUNCE);
+        //this.marker.setAnimation(this.google.maps.Animation.BOUNCE);
       } else {
         this.infowindow.close();
         this.marker.setAnimation(null);
@@ -46,17 +46,28 @@ export default {
       title: this.position.markerName
     });
     const infowindow = new InfoWindow({
-      content: this.position.markerName
+      content: "<div><b>" + this.position.markerName + " (" + this.position.id + ")</b></div><div>Reported By " + this.position.reportedBy + "</div><div>" + new Date(this.position.reportedAt*1000).toLocaleString() + "</div>"
     });
     this.infowindow = infowindow;
     this.marker = marker;
     marker.addListener("click", function() {
-      self.selectStore();
-    });
-    if (+this.storeId === this.position.storeId) {
       infowindow.open(this.map, marker);
-      this.marker.setAnimation(this.google.maps.Animation.BOUNCE);
-    }
+      //this.marker.setAnimation(this.google.maps.Animation.BOUNCE);
+    });
+
+    this.$root.$on('eventSelected', data => {
+      if (data.id === this.position.id) {
+        this.infowindow.open(this.map, this.marker);
+        //this.marker.setAnimation(this.google.maps.Animation.BOUNCE);
+      } else {
+        this.infowindow.close();
+        //this.marker.setAnimation(null);
+      }
+    });
+  },
+  beforeDestroy() {
+    console.log("Yes marker being destroyed...");
+    this.marker.setMap(null);
   }
 };
 </script>

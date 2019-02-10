@@ -30,6 +30,15 @@ export default {
       this.google = google;
       this.initializeMap();
     });
+
+    this.$root.$on('eventData', data => {
+        this.displayEvents(data);
+    });
+
+    this.$root.$on('eventSelected', event => {
+      this.mapLoaded && this.panToAndZoom(event.location.latitude, event.location.longitude, 10);
+    });
+
   },
   computed: {
     ...mapState({
@@ -56,8 +65,11 @@ export default {
       const { Map } = this.google.maps;
       this.map = new Map(mapContainer, this.mapConfig);
 
+      let root = this.$root;
+
       this.map.addListener('click', function(e) {
           console.log("coordsd = " + e.latLng.lat() +  e.latLng.lng());
+          root.$emit('mapLocationClicked', { latitude: e.latLng.lat(), longitude: e.latLng.lng() });
       });
 
       const { Geocoder } = this.google.maps;
@@ -71,19 +83,21 @@ export default {
     },
     panToSelectedStore() {
       const storeSelected = this.$store.getters["stores/getSelectedStore"];
-      if (storeSelected.lat !== "" && storeSelected.lng !== "") {
-        this.panToAndZoom(storeSelected.lat, storeSelected.lng, 14);
-      } else {
-        const storeAddress = storeSelected.custom["wpcf-yoox-store-address"][0];
-        const position = this.geocode(storeAddress);
-        if (position.geometry) {
-          this.panToAndZoom(
-            position.geometry.location.lat(),
-            position.geometry.location.lng(),
-            18
-          );
+      if ( storeSelected ) {
+        if (storeSelected.lat !== "" && storeSelected.lng !== "") {
+          this.panToAndZoom(storeSelected.lat, storeSelected.lng, 14);
         } else {
-          throw "Geocode was not successful: " + status;
+          const storeAddress = storeSelected.custom["wpcf-yoox-store-address"][0];
+          const position = this.geocode(storeAddress);
+          if (position.geometry) {
+            this.panToAndZoom(
+              position.geometry.location.lat(),
+              position.geometry.location.lng(),
+              18
+            );
+          } else {
+            throw "Geocode was not successful: " + status;
+          }
         }
       }
     },
@@ -121,6 +135,9 @@ export default {
         (results, status) =>
           status === "OK" ? results[0] : `Geocode was not successful: ${status}`
       );
+    },
+    displayEvents(events) {
+      console.log("Got events... " + events.length);
     }
   }
 };

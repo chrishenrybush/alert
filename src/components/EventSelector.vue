@@ -8,25 +8,31 @@
       >{{ eventType }}</option>
     </select>
     <div>
+      <input class="stores_search" type="number" placeholder="Latitude" v-model="latitude">
+      <input class="stores_search" type="number" placeholder="Longitude" v-model="longitude">
+      <label>Radius of search</label>
+      <input class="stores_search" type="number" placeholder="Radius (km)" v-model="radius">
+      <label>Period</label>
+      <input class="stores_search" type="number" placeholder="Period until now (Hours)" v-model="hours">
+      <button @click="queryEvents()" class="stores_search" >Retrieve Events</button>
       <input class="stores_search" type="text" placeholder="filter" v-model="keyword">
-      <span v-if="pending">... LOADING ...</span>
-      <span v-if="error">... ERROR!!! ...</span>
       <ul class="stores_list">
         <li
-          v-if="filteredStores.length === 0"
+          v-if="filteredEvents.length === 0"
           class="stores_list_store stores_list_store--empty"
-        >Non ci sono risultati</li>
+        >No Results</li>
         <li
           v-else
-          v-for="store in filteredStores"
-          :data-storeid="store.ID"
-          :key="store.ID"
-          v-on:click="selectStore(store.ID)"
+          v-for="eventResult in filteredEvents"
+          :data-storeid="eventResult.event.id"
+          :key="eventResult.event.id"
+          v-on:click="selectEvent(eventResult.event)"
           class="stores_list_store"
         >
-          <span class="stores_list_store_name">{{ store.post_title }}</span>
-          <span>{{ store.custom["wpcf-yoox-store-address"][0] }}</span>
-          <span>({{ store.lat }} - {{ store.lng }})</span>
+          <span class="stores_list_store_name">{{ eventResult.event.type }} ({{eventResult.event.id}})</span>
+          <span>Long: {{eventResult.event.location.longitude}} Lat: {{eventResult.event.location.latitude}} </span>
+          <span>Reported at: {{ eventResult.event.timeReported | formatepoch }}</span>
+          <span>Reported by : {{ eventResult.event.reportedBy.firstName + " " +  eventResult.event.reportedBy.lastName }}</span>
         </li>
       </ul>
     </div>
@@ -35,25 +41,30 @@
 
 <script>
 import { mapState } from "vuex";
-import * as R from "ramda";
+//import * as R from "ramda";
 import axios from 'axios';
 
 export default {
   data() {
     return {
       keyword: "",
+      latitude: null,
+      longitude: null,
+      radius: null,
+      hours: null,
       selectedEventType: null,
       eventTypes: [],
+      eventResults: [],
       eventQueryParams: {
-          devicesInRadius: 100.0,
+          devicesInRadius: 1.0,
           locationQualifier: {
-            latitude: 16.78778,
-            longitude: 1.4647474,
+            latitude: 50.85546672,
+            longitude: -4.63293723,
             radius: 1.0,
             cityName: null
           },
           timeQualifier: {
-            periodOfInterest: "PT24H",
+            periodOfInterest: "PT2400H",
             startTime: null,
             endTime: null
           },
@@ -67,10 +78,10 @@ export default {
       pending: state => state.stores.pending,
       error: state => state.stores.error
     }),
-    filteredStores() {
-      const keywordInLowerCase = R.toLower(this.keyword);
+    filteredEvents() {
+      /** const keywordInLowerCase = R.toLower(this.keyword);
       const hasKeywordInTitle = R.includes(keywordInLowerCase);
-      const storeName = R.prop("post_title");
+      const storeName = R.prop("event.id");
       const filterByKeyword = R.filter(
         R.compose(
           hasKeywordInTitle,
@@ -78,58 +89,60 @@ export default {
           storeName
         )
       );
-      const countryId = this.CountryId;
-      const hasCountryId = R.any(R.propEq("term_id", countryId));
-      const filterByCountryId = R.filter(
-        R.compose(
-          hasCountryId,
-          R.prop("terms")
-        )
-      );
-      const countryIdGtZero = () => R.gt(this.CountryId, 0);
-      const filterByCountryIdAndKeyword = R.compose(
-        filterByKeyword,
-        R.when(countryIdGtZero, filterByCountryId)
-      );
-      return filterByCountryIdAndKeyword(this.stores);
+      return filterByKeyword(this.eventResults);
+      ***/
+     return this.eventResults;
     }
   },
   methods: {
-    selectStore(clickedId) {
-      this.$store.dispatch({
-        type: "stores/selectStore",
-        id: clickedId
-      });
+    selectEvent(event) {
+      this.$root.$emit('eventSelected', event);
+      //this.$store.dispatch({
+      //  type: "stores/selectEvent",
+      //  id: clickedId
+      //});
     },
     selectEventTypeId() {
       //this.$store.dispatch({
       //  type: "stores/selectEventTypeId",
       //  id: +this.eventTypeId
       //});
+    },
+    queryEvents() {
+
+      this.eventQueryParams.locationQualifier.latitude = this.latitude;
+      this.eventQueryParams.locationQualifier.longitude = this.longitude;
+      this.eventQueryParams.locationQualifier.radius = this.radius * 1000.0;
+      this.eventQueryParams.eventTypeList = [ this.selectedEventType ];
+      this.eventQueryParams.timeQualifier.periodOfInterest = "PT" + this.hours + "H";
+      axios.post(`/api/eventquery`,  this.eventQueryParams )
+        .then(response => { 
+          console.log("Yes...." + JSON.stringify(response.data) );
+          this.eventResults = response.data;
+          this.$root.$emit('eventData', response.data);
+        })
+        .catch(e => {
+          console.log("Oh no.... " + e);
+        })
     }
   },
+  filters: {
+    formatepoch: function (value) {
+      if (!value) return ''
+      var d = new Date(value*1000); // The 0 there is the key, which sets the date to the epoch
+      //d.setUTCSeconds(value);
+      return d.toLocaleString();
+    }
+  }, 
   created() {
-    this.$store.dispatch("stores/getEventTypes");
-
-    let overrideEventQueryParams = {
-      devicesInRadius: 100.0,
-      locationQualifier: {
-        latitude: 16.78778,
-        longitude: 1.4647474,
-        radius: 1.0,
-        cityName: null
-      },
-      timeQualifier: {
-        periodOfInterest: "1D",
-        startTime: null,
-        endTime: null
-      },
-      eventTypeList: [{
-            EventType:"KnifeAttack"
-          }]
-    };
+    //this.$store.dispatch("stores/getEventTypes");
 
     console.log("Yes got here....");
+
+    this.$root.$on('mapLocationClicked', data => {
+        this.latitude = data.latitude;
+        this.longitude = data.longitude;
+    });
 
     axios.get("/api/eventTypes")
       .then(response => {
@@ -139,12 +152,6 @@ export default {
       .catch(e => {
         console.log("Oh no.... " + e);
       });
-
-    axios.post(`/api/eventquery`,  this.eventQueryParams )
-    .then(response => { console.log("Yes...." + JSON.stringify(response.data) )})
-    .catch(e => {
-      console.log("Oh no.... " + e);
-    })
   }
 };
 </script>

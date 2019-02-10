@@ -7,8 +7,8 @@
       <template slot-scope="scopeProps">
         <div class="markers">
           <child-marker
-            v-for="(marker,i) in markers"
-            :key="i"
+            v-for="(marker) in markers"
+            :key="marker.id"
             :position="marker"
             :google="scopeProps.google"
             :map="scopeProps.map"
@@ -32,11 +32,13 @@ export default {
   data() {
     return {
       mapConfig: mapConfig,
+      markers: [],
       apiKey: apiKey
     };
   },
   computed: {
-    markers() {
+    /****
+     *  markers() {
       return this.stores.reduce((acc, cur) => {
         return acc.concat({
           lat: parseFloat(cur.lat),
@@ -46,18 +48,38 @@ export default {
         });
       }, []);
     },
+          ***/
     ...mapState({
       stores: state => state.stores.all,
       selectedStoreId: state => state.stores.selectedStoreId
     })
   },
+  methods: {
+    displayEvents(events) {
+      this.markers = events.reduce((acc, eventResult) => {
+        return acc.concat({
+          lat: eventResult.event.location.latitude,
+          lng: eventResult.event.location.longitude,
+          markerName: eventResult.event.type,
+          id: eventResult.event.id,
+          reportedBy: eventResult.event.reportedBy.firstName + " " +  eventResult.event.reportedBy.lastName,
+          reportedAt: eventResult.event.timeReported
+        });
+      }, []);
+
+      console.log("Got events... " + events.length);
+    }
+  },
   mounted() {
-    const storeId = this.$route.params.store;
-    storeId &&
-      this.$store.dispatch({
-        type: "stores/selectStore",
-        id: storeId
-      });
+    this.$root.$on('eventData', data => {
+        this.displayEvents(data);
+    });
+    //const storeId = this.$route.params.store;
+    //storeId &&
+    //  this.$store.dispatch({
+    //    type: "stores/selectStore",
+    //    id: storeId
+    //  });
   },
   created() {
     this.$store.dispatch("stores/getAllStores");
