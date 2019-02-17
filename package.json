@@ -13,11 +13,15 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "firebase": "^5.8.2",
     "google-maps-api-loader": "^1.1.1",
+    "jquery": "^3.3.1",
     "ramda": "^0.26.1",
     "register-service-worker": "^1.0.0",
+    "toastr": "^2.1.4",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
+    "vue-toastr-2": "0.0.10",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

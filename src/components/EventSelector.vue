@@ -16,6 +16,7 @@
       <input class="stores_search" type="number" placeholder="Period until now (Hours)" v-model="hours">
       <button @click="queryEvents()" class="stores_search" >Retrieve Events</button>
       <input class="stores_search" type="text" placeholder="filter" v-model="keyword">
+      <div id="outTable"></div>
       <ul class="stores_list">
         <li
           v-if="filteredEvents.length === 0"
