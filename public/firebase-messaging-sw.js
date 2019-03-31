@@ -24,8 +24,10 @@ self.addEventListener("push", async event => {
   //const tx = this.db.transaction("jokes", "readwrite");
   //const store = tx.objectStore("jokes");
 
-  console.log("json=" + event.data.json().data);
-  const data = event.data.json().data;
+  let jsonPayload = event.data.json();
+  console.log("json=" + jsonPayload);
+
+  const data =  ( jsonPayload.data ) ? ejsonPayload.data : {};
   //data.id = parseInt(data.id);
   //data.id = 1;
   //store.put(data);
@@ -45,7 +47,7 @@ async function getDb() {
   }
 
   return new Promise(resolve => {
-    const openRequest = indexedDB.open("Chuck", 1);
+    const openRequest = indexedDB.open("Alerts", 1);
 
     openRequest.onupgradeneeded = event => {
       const db = event.target.result;

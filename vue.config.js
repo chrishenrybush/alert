@@ -1,5 +1,5 @@
 module.exports = {
-  baseUrl: "/alert/",
+  publicPath: "/alert/",
   outputDir: undefined,
   assetsDir: undefined,
   runtimeCompiler: undefined,

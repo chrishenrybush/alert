@@ -3,8 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --http",
+    "serve": "vue-cli-service serve --http --port 8090",
     "build": "vue-cli-service build",
+    "builddev": "vue-cli-service build --mode development",
     "lint": "vue-cli-service lint",
     "test:unit": "vue-cli-service test:unit",
     "testWatch": "npm run test:unit -- --watch",

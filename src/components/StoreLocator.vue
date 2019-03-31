@@ -54,7 +54,7 @@ export default {
           lng: eventResult.event.location.longitude,
           markerName: eventResult.event.type,
           id: eventResult.event.id,
-          reportedBy: eventResult.event.reportedBy.firstName + " " +  eventResult.event.reportedBy.lastName,
+          reportedBy: eventResult.event.reportedBy.username,
           reportedAt: eventResult.event.timeReported
         });
       }, []);

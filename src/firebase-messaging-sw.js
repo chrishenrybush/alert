@@ -36,7 +36,7 @@ async function getDb() {
   }
 
   return new Promise(resolve => {
-    const openRequest = indexedDB.open("Chuck", 1);
+    const openRequest = indexedDB.open("Alerts", 1);
 
     openRequest.onupgradeneeded = event => {
       const db = event.target.result;

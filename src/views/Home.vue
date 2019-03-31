@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <router-link to="/store-locator">Store locator</router-link>
+    <router-link to="/store-locator">Panic Map</router-link>
     baseUrl: {{baseUrl}}
   </div>
 </template>
